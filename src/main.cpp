@@ -5,7 +5,9 @@
 #include <Adafruit_BMP085.h>
 
 SoftwareSerial SerialGPS = SoftwareSerial(D5, D7);
-TinyGPS gps; 
+TinyGPS gps;
+unsigned long fix;
+float latitud, longitud;
 
 const int offset = -6;
 time_t prevDisplay = 0;
@@ -116,8 +118,6 @@ void fecha_gps()
             unsigned long age;
             int Year;
             byte Month, Day, Hour, Minute, Second;
-            unsigned long fix;
-            float latitud, longitud;
             gps.crack_datetime(&Year, &Month, &Day, &Hour, &Minute, &Second, NULL, &age);
             if (age < 500)
             {
@@ -154,6 +154,44 @@ void digitalClockDisplay()
     Serial.println(); 
 }
 
+bool Check_on_movemnet( bool & Movimiento_en_X, bool & Movimiento_en_Y, bool & Movimiento_en_Z){
+    //Muestra valores (informacion) cuando el sensor se mueva
+    Movimiento_en_X = false;
+    Movimiento_en_Y = false;
+    Movimiento_en_Z = false;
+
+    if(x_data >= x_old + diferencia)
+    {
+        x_old = x_data;
+        Movimiento_en_X = true;
+        return  true;
+        //Serial.print("X=");
+        //Serial.print(x_data);
+        //Serial.println(" ");
+    }
+    if(y_data >= y_old + diferencia)
+    {
+        y_old = y_data;
+        Movimiento_en_Y = true;
+        return  true;
+        //Serial.print("Y=");
+        //Serial.print(y_data);
+        //Serial.println(" ");
+    }    
+    if(z_data >= z_old + diferencia)
+    {
+        z_old = z_data;
+        Movimiento_en_Z = true;
+        return  true;
+        //Serial.print("Z=");   
+        //Serial.print(z_data);
+        //Serial.println(" ");
+    }
+    else
+    {
+        return false;
+    }
+}
 void loop() 
 {
     if(millis() > TimeNow + Interval_Bat)
@@ -179,7 +217,12 @@ void loop()
         Serial.println(" meters");
         Serial.println();
     }
-    AccelerometerInit(); 
+    AccelerometerInit();
+    if(Check_on_movemnet != false){
+        bool X, Y, Z;
+        Serial.println("movimiento en: ");
+        Serial.println(Check_on_movemnet( X, Y, Z));
+    }
 
     //reinicia los valores, para que despues de cierto tiempo, los vuelva a mostrar, ya que sin esto, se necesitaria mas movimiento del sensor para poder mostrar nuevamente los valores
     if (millis()> tiempo_recorr + intervalo)
@@ -189,31 +232,7 @@ void loop()
         y_old = y_data;
         z_old = z_data;
     }
-    //Muestra valores (informacion) cuando el sensor se mueva 
-    if(x_data >= x_old + diferencia)
-    {
-        x_old = x_data;
-        Serial.print("X=");
-        Serial.print(x_data);
-        Serial.println(" ");
-    }
-
-    if(y_data >= y_old + diferencia)
-    {
-        y_old = y_data;
-        Serial.print("Y=");
-        Serial.print(y_data);
-        Serial.println(" ");
-    }
-    
-    if(z_data >= z_old + diferencia)
-    {
-        z_old = z_data;
-        Serial.print("Z=");   
-        Serial.print(z_data);
-        Serial.println(" ");
-    }
-
+   
     fecha_gps();
 
     if(millis() >gps_time + gps_interval)
