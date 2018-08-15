@@ -12,7 +12,7 @@ float latitud, longitud;
 const int offset = -6;
 time_t prevDisplay = 0;
 
-#define gps_interval 8000
+#define gps_interval 30000
 unsigned long gps_time;
 //--//--
 
@@ -21,21 +21,22 @@ volatile int AnalogInput = A0;
 int raw = 0;
 float V, Volts = 0.0;
 
-#define Interval_Bat 9000
+#define Interval_Bat 15000
 unsigned long TimeNow;
 //--batt
 
 //
 Adafruit_BMP085 bmp;
-#define intervalo_bmp 10000
+#define intervalo_bmp 60000
 unsigned long tiempo_bmp;
 int temperature_bmp;
 int altitude_bmp;
 //
 
 #include <Wire.h>
-#define diferencia 2
+#define diferencia 5
 #define intervalo 15000
+String eje_de_movimiento;
 
 byte Version[3];
 int8_t x_data;
@@ -154,16 +155,14 @@ void digitalClockDisplay()
     Serial.println(); 
 }
 
-bool Check_on_movemnet( bool & Movimiento_en_X, bool & Movimiento_en_Y, bool & Movimiento_en_Z){
+bool Check_on_movemnet( String & Movimiento_en_eje){
     //Muestra valores (informacion) cuando el sensor se mueva
-    Movimiento_en_X = false;
-    Movimiento_en_Y = false;
-    Movimiento_en_Z = false;
-
+    Movimiento_en_eje = "";
+    
     if(x_data >= x_old + diferencia)
     {
         x_old = x_data;
-        Movimiento_en_X = true;
+        Movimiento_en_eje = "X";
         return  true;
         //Serial.print("X=");
         //Serial.print(x_data);
@@ -172,7 +171,7 @@ bool Check_on_movemnet( bool & Movimiento_en_X, bool & Movimiento_en_Y, bool & M
     if(y_data >= y_old + diferencia)
     {
         y_old = y_data;
-        Movimiento_en_Y = true;
+        Movimiento_en_eje = "Y";
         return  true;
         //Serial.print("Y=");
         //Serial.print(y_data);
@@ -181,16 +180,15 @@ bool Check_on_movemnet( bool & Movimiento_en_X, bool & Movimiento_en_Y, bool & M
     if(z_data >= z_old + diferencia)
     {
         z_old = z_data;
-        Movimiento_en_Z = true;
+        Movimiento_en_eje = "Z";
         return  true;
         //Serial.print("Z=");   
         //Serial.print(z_data);
         //Serial.println(" ");
-    }
-    
+    }    
     return false;
-    
 }
+
 void loop() 
 {
     if(millis() > TimeNow + Interval_Bat)
@@ -217,10 +215,10 @@ void loop()
         Serial.println();
     }
     AccelerometerInit();
-    if(Check_on_movemnet != false){
-        bool X, Y, Z;
-        Serial.println("movimiento en: ");
-        Serial.println(Check_on_movemnet( X, Y, Z));
+
+    if( Check_on_movemnet(eje_de_movimiento) != false ){
+        Serial.println("movimiento en : ");
+        Serial.println(eje_de_movimiento);
     }
 
     //reinicia los valores, para que despues de cierto tiempo, los vuelva a mostrar, ya que sin esto, se necesitaria mas movimiento del sensor para poder mostrar nuevamente los valores
