@@ -187,10 +187,9 @@ bool Check_on_movemnet( bool & Movimiento_en_X, bool & Movimiento_en_Y, bool & M
         //Serial.print(z_data);
         //Serial.println(" ");
     }
-    else
-    {
-        return false;
-    }
+    
+    return false;
+    
 }
 void loop() 
 {
