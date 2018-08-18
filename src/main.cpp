@@ -12,7 +12,7 @@ float latitud, longitud;
 const int offset = -6;
 time_t prevDisplay = 0;
 
-#define gps_interval 30000
+#define gps_interval 60000
 unsigned long gps_time;
 //--//--
 
@@ -27,7 +27,7 @@ unsigned long TimeNow;
 
 //
 Adafruit_BMP085 bmp;
-#define intervalo_bmp 60000
+#define intervalo_bmp 30000
 unsigned long tiempo_bmp;
 int temperature_bmp;
 int altitude_bmp;
@@ -238,9 +238,9 @@ void loop()
         Serial.println("Ejecutando_gps");
         Serial.print("latitud: ");
         Serial.print(latitud);
-        Serial.print("longitud: ");
+        Serial.print(" longitud: ");
         Serial.print(longitud);
-        Serial.print("fix: ");
+        Serial.print(" fix: ");
         Serial.println(fix);
         
         if (timeStatus()!= timeNotSet)
